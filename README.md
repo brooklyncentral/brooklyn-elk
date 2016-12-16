@@ -238,3 +238,7 @@ in this case Tomcat.
 ~~~
 
 
+Configuring an appropriate visualisation on the Kibana server (access it via the URL on the summary tab for 
+that entity) allows a dashboard to be created such as
+
+![kibana dashboard](logstash-snapshot.png)

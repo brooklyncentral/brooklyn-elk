@@ -20,25 +20,37 @@ For more about the ELK stack, please see the documentation [here](https://www.el
 
 There are four blueprints that make up this application. Each of them are used to add one or more catalog items to Brooklyn. You can find them below:
 
-* [Elasticsearch](example_yaml/brooklyn-elasticsearch-catalog.bom)
-* [Logstash](example_yaml/brooklyn-logstash-catalog.bom)
-* [Kibana](example_yaml/brooklyn-kibana-catalog.bom)
-* [ELK](example_yaml/brooklyn-elk-catalog.bom)
+* [Elasticsearch](brooklyn-elasticsearch-catalog.bom)
+* [Logstash](brooklyn-logstash-catalog.bom)
+* [Kibana](brooklyn-kibana-catalog.bom)
+* [ELK](brooklyn-elk-catalog.bom)
 
 ### Running the example
-First, add all four blueprints to the Brooklyn Catalog. This can be done by clicking the 'Catalog' tab, clicking the '+' symbol and pasting the YAML. Once this is done, click the 'Application' tab, then the '+' button to bring up the add application wizard. A new Catalog application will be available called 'ELK Stack'. Using the add application wizard, you should be able to deploy an ELK stack to a location of your choosing.
+First, add all four blueprints to the Brooklyn Catalog. This can be done by clicking the 'Catalog' tab, clicking the '+'
+ symbol and pasting the YAML. Once this is done, click the 'Application' tab, then the '+' button to bring up the add 
+application wizard. A new Catalog application will be available called 'ELK Stack'. Using the add application wizard, 
+you should be able to deploy an ELK stack to a location of your choosing.  Alternatively use the `br` Brooklyn
+command line tool and add the files with `br catalog add`.
 
 ### Exploring the example
 After the application has been deployed, you can ensure it is working as expected by checking the following:
 
-* There is a Kibana sensor called `main.uri`, the value of which points to the Kibana front end. You can explore this front end, and observe the logs stored in Elasticsearch. Many Brooklyn applications have a `main.uri` set to point you in the right direction.
-* You can also use the Elasticsearch REST API to explore further. The Elasticsearch Cluster entity has a `urls.http.list` sensor. Using a host:port from that list you will be able to access the REST API. The following URL will give you the state of the cluster `http://<host:port>/_cluster/health?pretty=true`. As you can see the `number_of_nodes` is currently 2, indicating that the Elasticsearch nodes are communicating with each other.
+* There is a Kibana sensor called `main.uri`, the value of which points to the Kibana front end. You can explore this 
+front end, and observe the logs stored in Elasticsearch. Many Brooklyn applications have a `main.uri` set to point you 
+in the right direction.
+* You can also use the Elasticsearch REST API to explore further. The Elasticsearch Cluster entity has a `urls.http.list` 
+sensor. Using a host:port from that list you will be able to access the REST API. The following URL will give you the 
+state of the cluster `http://<host:port>/_cluster/health?pretty=true`. As you can see the `number_of_nodes` is 
+currently 2, indicating that the Elasticsearch nodes are communicating with each other.
 
 ## Interesting Feature Spotlight
 We will mainly focus on the Elasticsearch blueprint, and will be clear when another blueprint is being discussed. This blueprint describes a cluster of Elasticsearch nodes. 
 
 ### Provisioning Properties
-Our Elasticsearch blueprint has a few requirements of the location in which it is run. Firstly, it must be run on an Ubuntu machine as the example has been written specifically for this OS. Secondly, two ports must opened to ensure that the entities can be accessed from the outside world. Both of these requirements are configured via provisioning.properties as follows:
+Our Elasticsearch blueprint has a few requirements of the location in which it is run. Firstly, it must be run on an
+ Ubuntu machine as the example has been written specifically for this OS. Secondly, two ports must opened to ensure
+  that the entities can be accessed from the outside world. Both of these requirements are configured via provisioning
+  .properties as follows:
 
 ~~~yaml
 brooklyn.config:

@@ -86,11 +86,10 @@ The Customize Command is run after the application has been installed but before
     echo network.host: ${IP_ADDRESS} | sudo tee -a /etc/elasticsearch/elasticsearch.yml
 ~~~
 The purpose of this section is to create a YAML file with all of the required configuration. We use the YAML 
-literal style `|` indicator to write a multi line command. We then use `$brooklyn:formatString` notation to 
-build the string from configuration. We start our series of commands by using the `rm` command to remove the 
-previous config file. We then use `echo` and `tee` to create the new config file and insert the config. Part 
-of the configuration is a list of all hosts that is set on the parent entity- this is done by using a combination
- of the `component` and  `attributeWhenReady` DSL commands. More on how this is generated later.
+literal style `|` indicator to write a multi line command.  We start our series of commands by using the `rm` 
+command to remove the previous config file. We then use `echo` and `tee` to create the new config file and 
+insert the config. Part of the configuration is a list of all hosts that is set on the parent entity- this
+is done by using a combination of the `component` and  `attributeWhenReady` DSL commands. More on how this is generated later.
 
 #### Check running
 After an app is installed and run, this command is scheduled to run regularly and used to populate the `service.isUp` 

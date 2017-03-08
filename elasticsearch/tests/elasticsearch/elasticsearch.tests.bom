@@ -1,0 +1,112 @@
+brooklyn.catalog:
+  version: &elasticsearchVersion "1.0.0-SNAPSHOT" # BROOKLYN_ELK_VERSION
+  iconUrl: &elasticsearchIconUrl "https://static-www.elastic.co/assets/blt9a26f88bfbd20eb5/icon-elasticsearch-bb.svg"
+  items:
+    - "https://raw.githubusercontent.com/brooklyncentral/common-catalog-utils/master/common-tests/src/main/resources/commontests/common.tests.bom"
+    - id: elasticsearch-node-tests
+      version: *elasticsearchVersion
+      itemType: template
+      iconUrl: *elasticsearchIconUrl
+      name: "Elasticsearch Node Tests"
+      item:
+        services:
+          - type: elasticsearch-node
+            id: elasticsearch-node
+          - type: test-case
+            name: "Elasticsearch Node Tests"
+            brooklyn.config:
+              timeout: 1h
+              targetId: elasticsearch-node
+              process.grep.name: "[e]lasticsearch"
+            brooklyn.children:
+              - type: assert-up-and-running-initial
+                name: "1. Elasticsearch node up and running"
+              - type: assert-reachable
+                name: "2. Elasticsearch node API reachable"
+                brooklyn.config:
+                  endpointSensor: main.uri
+                  timeout: 5m
+              - type: assert-restart-process
+                name: "3. Elasticsearch node restart process"
+              - type: assert-stop-and-restart-process
+                name: "4. Elasticsearch node stop and restart process"
+    - id: elasticsearch-cluster-tests
+      itemType: template
+      version: *elasticsearchVersion
+      iconUrl: *elasticsearchIconUrl
+      name: "Elasticsearch Cluster Tests"
+      item:
+        services:
+          - type: elasticsearch-cluster
+            id: elasticsearch-cluster
+          - type: test-case
+            name: "Elasticsearch Cluster Tests"
+            brooklyn.config:
+              timeout: 1h
+              targetId: elasticsearch-cluster
+            brooklyn.children:
+              - type: assert-up-and-running-initial
+                name: "1. Elasticsearch cluster up and running"
+              - type: test-case
+                name: "2. Elasticsearch cluser scaling tests"
+                brooklyn.children:
+                - type: assert-sensor
+                  name: "2.1 Elasticsearch cluster initial size is 3"
+                  brooklyn.config:
+                    sensor: "group.members.count"
+                    assert:
+                      equals: 3
+                - type: org.apache.brooklyn.test.framework.SimpleShellCommandTest
+                  name: "2.2 Elasticsearch reports cluster size 3"
+                  target: $brooklyn:component("elasticsearch-cluster").attributeWhenReady("cluster.first.entity")
+                  command: |
+                    curl -s -XGET "http://${HOSTNAME}:9200/_cluster/health" | grep '"number_of_nodes":3'
+                  assertStatus:
+                    equals: 0
+                - type: invoke-effector
+                  name: "2.3 Invoke resize UP"
+                  brooklyn.config:
+                    effector: resizeByDelta
+                    params:
+                      delta: "+2"
+                - type: assert-sensor
+                  name: "2.4 Elasticsearch cluster size is 5"
+                  brooklyn.config:
+                    sensor: "group.members.count"
+                    assert:
+                      equals: 5
+                - type: org.apache.brooklyn.test.framework.SimpleShellCommandTest
+                  name: "2.5 Elasticsearch reports cluster size 5"
+                  target: $brooklyn:component("elasticsearch-cluster").attributeWhenReady("cluster.first.entity")
+                  command: |
+                    curl -s -XGET "http://${HOSTNAME}:9200/_cluster/health" | grep '"number_of_nodes":5'
+                  assertStatus:
+                    equals: 0
+                - type: invoke-effector
+                  name: "2.6 Invoke resize DOWN"
+                  brooklyn.config:
+                    effector: resizeByDelta
+                    params:
+                      delta: "-2"
+                - type: assert-sensor
+                  name: "2.7 Elasticsearch cluster size is 3"
+                  brooklyn.config:
+                    sensor: "group.members.count"
+                    assert:
+                      equals: 3
+                - type: org.apache.brooklyn.test.framework.SimpleShellCommandTest
+                  name: "2.8 Elasticsearch reports cluster size 3"
+                  brooklyn.config:
+                    target: $brooklyn:component("elasticsearch-cluster").attributeWhenReady("cluster.first.entity")
+                    command: |
+                      curl -s -XGET "http://${HOSTNAME}:9200/_cluster/health" | grep '"number_of_nodes":3'
+                    assertStatus:
+                      equals: 0
+              - type: org.apache.brooklyn.test.framework.SimpleShellCommandTest
+                name: "3. Elasticsearch cluster status green"
+                brooklyn.config:
+                  target: $brooklyn:component("elasticsearch-cluster").attributeWhenReady("cluster.first.entity")
+                  command: |
+                    curl -s -XGET "http://${HOSTNAME}:9200/_cluster/health" | grep '"status":"green"'
+                  assertStatus:
+                    equals: 0

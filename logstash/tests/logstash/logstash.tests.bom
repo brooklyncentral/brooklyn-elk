@@ -1,13 +1,13 @@
 brooklyn.catalog:
-  version: &kibanaVersion "1.0.0-SNAPSHOT" # BROOKLYN_ELK_VERSION
-  iconUrl: &kibanaIconUrl "https://static-www.elastic.co/assets/blt282ae2420e32fc38/icon-kibana-bb.svg"
+  version: &logstashVersion "1.0.0-SNAPSHOT" # BROOKLYN_ELK_VERSION
+  iconUrl: &logstashIconUrl "https://static-www.elastic.co/assets/blt946bc636d34a70eb/icon-logstash-bb.svg"
   items:
     - "https://raw.githubusercontent.com/brooklyncentral/common-catalog-utils/master/common-tests/src/main/resources/commontests/common.tests.bom"
-    - id: kibana-tests
-      version: *kibanaVersion
+    - id: logstash-tests
+      version: *logstashVersion
       itemType: template
-      iconUrl: *kibanaIconUrl
-      name: "Kibana Tests"
+      iconUrl: *logstashIconUrl
+      name: "Logstash Tests"
       item:
         services:
           - type: logstash
@@ -26,7 +26,6 @@ brooklyn.catalog:
                     path  => "/qa-test/output.json"
                   }
                 }
-              elasticsearch.url: $brooklyn:component("sibling","elasticsearch-node").attributeWhenReady("main.uri")
           - type: test-case
             name: "Logstash Tests"
             brooklyn.config:
@@ -58,12 +57,10 @@ brooklyn.catalog:
                       sudo chown -R logstash:logstash /qa-test
                       sudo echo "$(date -u +"%Y-%m-%dT%H:%M:%SZ") - test log message id [$(uuidgen)]" | tee -a /qa-test/input.log
                       sudo systemctl restart logstash
-                      sleep 30
-                      sudo echo "$(date -u +"%Y-%m-%dT%H:%M:%SZ") - test log message id [$(uuidgen)]" | tee -a /qa-test/input.log
-                      sleep 5
-                      sudo echo "$(date -u +"%Y-%m-%dT%H:%M:%SZ") - test log message id [$(uuidgen)]" | tee -a /qa-test/input.log
-                      sleep 5
-                      sudo echo "$(date -u +"%Y-%m-%dT%H:%M:%SZ") - test log message id [$(uuidgen)]" | tee -a /qa-test/input.log
+                      for i in $(seq 1 10); do
+                        sudo echo "$(date -u +"%Y-%m-%dT%H:%M:%SZ") - LEVEL${i} - test log message id [$(uuidgen)]" | tee -a /qa-test/input.log
+                        sleep 5
+                      done
                     assertStatus:
                       equals: 0
                   - type: org.apache.brooklyn.test.framework.SimpleShellCommandTest

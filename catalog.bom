@@ -1,0 +1,5 @@
+brooklyn.catalog:
+  items:
+    - "https://raw.githubusercontent.com/brooklyncentral/brooklyn-elk/master/elasticsearch/catalog/elasticsearch/elasticsearch.bom"
+    - "https://raw.githubusercontent.com/brooklyncentral/brooklyn-elk/master/kibana/catalog/kibana/kibana.bom"
+    - "https://raw.githubusercontent.com/brooklyncentral/brooklyn-elk/master/logstash/catalog/logstash/logstash.bom"

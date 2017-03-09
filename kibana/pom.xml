@@ -12,6 +12,32 @@
     </parent>
 
     <artifactId>brooklyn-kibana</artifactId>
+    <name>Brooklyn :: Kibana</name>
 
-
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-artifact</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>${project.basedir}/catalog/kibana/kibana.bom</file>
+                                    <classifier>kibana</classifier>
+                                    <type>bom</type>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

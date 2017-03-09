@@ -1,0 +1,8 @@
+name: "Elasticsearch Cluster Example"
+location: <REPLACE_ME>
+services:
+  - type: elasticsearch-cluster
+    brooklyn.config:
+      elasticsearch.cluster.name: "example-elastic-search-cluster"
+      elasticsearch.http.port: 9200
+      elasticsearch.tcp.port: 9330

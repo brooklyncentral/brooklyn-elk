@@ -1,17 +1,24 @@
 brooklyn.catalog:
-  version: &kibanaVersion "1.0.0-SNAPSHOT" # BROOKLYN_ELK_VERSION
-  iconUrl: &kibanaIconUrl https://static-www.elastic.co/assets/blt282ae2420e32fc38/icon-kibana-bb.svg
-  description: &kibanaDescription |
-    Kibana lets you visualize your Elasticsearch data and navigate the Elastic Stack,
-    so you can do anything from learning why you're getting paged at 2:00 a.m.
-    to understanding the impact rain might have on your quarterly numbers.
+  publish: &kibanaPublish
+    name: &kibanaName "Kibana"
+    description: &kibanaDescription |
+      Kibana lets you visualize your Elasticsearch data and navigate the Elastic Stack,
+      so you can do anything from learning why you're getting paged at 2:00 a.m.
+      to understanding the impact rain might have on your quarterly numbers.
+    version: &kibanaVersion "1.0.0-SNAPSHOT" # BROOKLYN_ELK_VERSION
+    iconUrl: &kibanaIconUrl https://static-www.elastic.co/assets/blt282ae2420e32fc38/icon-kibana-bb.svg
+    license_code: "Apache-2.0"
   items:
   - id: kibana
-    name: "Kibana"
+    name: *kibanaName
+    version: *kibanaVersion
+    iconUrl: *kibanaIconUrl
+    description: *kibanaDescription
+    publish: *kibnaPublish
     itemType: entity
     item:
       type: org.apache.brooklyn.entity.software.base.VanillaSoftwareProcess
-      name: "Kibana"
+      name: *kibanaName
       provisioning.properties:
         osFamily: centos
         osVersionRegex: 7
@@ -96,7 +103,7 @@ brooklyn.catalog:
             enricher.triggerSensors:
               - $brooklyn:sensor("host.address")
             enricher.targetSensor:
-              $brooklyn:sensor("org.apache.brooklyn.core.entity.Attributes", "main.uri")
+              $brooklyn:sensor("main.uri.public")
             enricher.targetValue:
               $brooklyn:formatString:
                 - "http://%s:%s"

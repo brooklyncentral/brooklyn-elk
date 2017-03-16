@@ -1,45 +1,55 @@
 brooklyn.catalog:
-  version: &elasticsearchVersion "1.0.0-SNAPSHOT" # BROOKLYN_ELK_VERSION
-  iconUrl: &elasticsearchIconUrl "https://static-www.elastic.co/assets/blt9a26f88bfbd20eb5/icon-elasticsearch-bb.svg"
-  description: &elasticsearchDescription
-    Elasticsearch is a distributed, RESTful search and analytics engine capable of solving a growing number of use cases.
-    As the heart of the Elastic Stack, it centrally stores your data so you can discover the expected and uncover the unexpected.
+  publish: &elasticsearchPublish
+    version: &elasticsearchVersion "1.0.0-SNAPSHOT" # BROOKLYN_ELK_VERSION
+    iconUrl: &elasticsearchIconUrl "https://static-www.elastic.co/assets/blt9a26f88bfbd20eb5/icon-elasticsearch-bb.svg"
+    description: &elasticsearchDescription
+      Elasticsearch is a distributed, RESTful search and analytics engine capable of solving a growing number of use cases.
+      As the heart of the Elastic Stack, it centrally stores your data so you can discover the expected and uncover the unexpected.
+    license_code: "APACHE-2.0"
+  global.parameters:
+    elasticsearch.cluster.name: &elasticsearchClusterName
+      name: elasticsearch.cluster.name
+      label: "Cluster name"
+      description: |
+        The elasticsearch Cluster name
+      type: string
+    elasticsearch.node.name: &elasticsearchNodeName
+      name: elasticsearch.node.name
+      label: "Node name"
+      description: |
+        The elasticsearch node name
+      type: string
+    elasticsearch.http.port: &elasticsearchHttpPort
+      name: elasticsearch.http.port
+      label: "HTTP port"
+      description: |
+        The elasticsearch HTTP port
+      type: integer
+      default: 9200
+    elasticsearch.tcp.port: &elasticsearchTcpPort
+      name: elasticsearch.tcp.port
+      label: "TCP port"
+      description: |
+        The elasticsearch HTTP port
+      type: integer
+      default: 9330
   items:
     - id: elasticsearch-node
       name: "Elasticsearch Node"
       description: *elasticsearchDescription
       version: *elasticsearchVersion
       iconUrl: *elasticsearchIconUrl
+      publish: *elasticsearchPublish
       itemType: entity
       item:
         id: elasticsearch-node
         name: "Elasticsearch Node"
         type: org.apache.brooklyn.entity.software.base.VanillaSoftwareProcess
-        brooklyn.parameters: &elasticsearchNodeParameters
-        - name: elasticsearch.cluster.name
-          label: "Cluster name"
-          description: |
-            The elasticsearch Cluster name
-          type: string
-        - name: elasticsearch.node.name
-          label: "Node name"
-          description: |
-            The elasticsearch node name
-          type: string
-
-        - name: elasticsearch.http.port
-          label: "HTTP port"
-          description: |
-            The elasticsearch HTTP port
-          type: integer
-          default: 9200
-        - name: elasticsearch.tcp.port
-          label: "TCP port"
-          description: |
-            The elasticsearch HTTP port
-          type: integer
-          default: 9330
-
+        brooklyn.parameters:
+          - *elasticsearchClusterName
+          - *elasticsearchNodeName
+          - *elasticsearchHttpPort
+          - *elasticsearchTcpPort
         brooklyn.config:
           provisioning.properties:
             osFamily: centos
@@ -47,7 +57,7 @@ brooklyn.catalog:
             minRam: 8192mb
             minDisk: 100gb
             minCores: 4
-          shell.env: &elasticsearchSellEnv
+          shell.env: &elasticsearchShellEnv
             ELASTICSEARCH_CLUSTER_NAME: $brooklyn:config("elasticsearch.cluster.name")
             ELASTICSEARCH_NODE_NAME: $brooklyn:config("elasticsearch.node.name")
             ELASTICSEARCH_HTTP_PORT: $brooklyn:config("elasticsearch.http.port")
@@ -111,7 +121,7 @@ brooklyn.catalog:
               enricher.triggerSensors:
                 - $brooklyn:sensor("host.address")
               enricher.targetSensor:
-                $brooklyn:sensor("org.apache.brooklyn.core.entity.Attributes", "main.uri")
+                $brooklyn:sensor("main.uri.public")
               enricher.targetValue:
                 $brooklyn:formatString:
                   - "http://%s:%s"
@@ -119,12 +129,12 @@ brooklyn.catalog:
                   - $brooklyn:config("elasticsearch.http.port")
           - type: org.apache.brooklyn.enricher.stock.Transformer
             brooklyn.config:
-              uniqueTag: elasticsearch-private-uri-enricher
+              uniqueTag: elasticsearch-main-uri-private-enricher
               enricher.producer: $brooklyn:entity("elasticsearch-node")
               enricher.triggerSensors:
                 - $brooklyn:sensor("host.subnet.address")
               enricher.targetSensor:
-                $brooklyn:sensor("private.uri")
+                $brooklyn:sensor("main.uri.private")
               enricher.targetValue:
                 $brooklyn:formatString:
                   - "http://%s:%s"
@@ -135,12 +145,16 @@ brooklyn.catalog:
       description: *elasticsearchDescription
       version: *elasticsearchVersion
       iconUrl: *elasticsearchIconUrl
+      publish: *elasticsearchPublish
       itemType: entity
       item:
         type: cluster
         id: elasticsearch-cluster
         name: "Elasticsearch Cluster"
-        brooklyn.parameters: *elasticsearchNodeParameters
+        brooklyn.parameters:
+          - *elasticsearchClusterName
+          - *elasticsearchHttpPort
+          - *elasticsearchTcpPort
         brooklyn.config:
           cluster.initial.size: 3
           dynamiccluster.memberspec:
@@ -148,7 +162,7 @@ brooklyn.catalog:
               type: elasticsearch-node
               brooklyn.config:
                 shell.env:
-                  <<: *elasticsearchSellEnv
+                  <<: *elasticsearchShellEnv
                   ELASTICSEARCH_UNICAST_HOSTS: $brooklyn:parent().attributeWhenReady("elasticsearch.hostnames")
         brooklyn.enrichers:
           - type: org.apache.brooklyn.enricher.stock.Aggregator

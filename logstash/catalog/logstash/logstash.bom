@@ -1,25 +1,26 @@
 brooklyn.catalog:
-  version: &logstashVersion "1.0.0-SNAPSHOT" # BROOKLYN_ELK_VERSION
-  iconUrl: &logstashIconUrl "https://static-www.elastic.co/assets/blt946bc636d34a70eb/icon-logstash-bb.svg"
-  description: &logstashDescription |
-    Logstash is an open source, server-side data processing pipeline that ingests data
-    from a multitude of sources simultaneously, transforms it, and then sends it to your favorite “stash.”
-
+  publish: &logstashPublish
+    name: &logstashName Logstash
+    description: &logstashDescription |
+      Logstash is an open source, server-side data processing pipeline that ingests data
+      from a multitude of sources simultaneously, transforms it, and then sends it to your favorite “stash.”
+    version: &logstashVersion "1.0.0-SNAPSHOT" # BROOKLYN_ELK_VERSION
+    iconUrl: &logstashIconUrl "https://static-www.elastic.co/assets/blt946bc636d34a70eb/icon-logstash-bb.svg"
   items:
     - id: logstash
-      name: "Logstash"
+      name: *logstashName
       version: *logstashVersion
       iconUrl: *logstashIconUrl
       description: *logstashDescription
+      publish: *logstashPublish
       itemType: entity
       item:
         type: org.apache.brooklyn.entity.software.base.VanillaSoftwareProcess
-        name: "Logstash"
+        name: *logstashName
         provisioning.properties:
           osFamily: centos
           osVersionRegex: 7
         brooklyn.parameters: &logstashParameters
-
         - name: logstash.http.port
           label: "Logstash http port"
           description: |
@@ -29,7 +30,7 @@ brooklyn.catalog:
         - name: logstash.node.name
           label: "Logstash node name"
           description: |
-            The logstash http port
+            The logstash node name
           type: string
         - name: logstash.pipeline.input
           label: "Logstash pipeline input"
@@ -111,7 +112,7 @@ brooklyn.catalog:
               enricher.triggerSensors:
                 - $brooklyn:sensor("host.address")
               enricher.targetSensor:
-                $brooklyn:sensor("org.apache.brooklyn.core.entity.Attributes", "main.uri")
+                $brooklyn:sensor("main.uri.public")
               enricher.targetValue:
                 $brooklyn:formatString:
                   - "http://%s:%s"

@@ -38,7 +38,7 @@ brooklyn.catalog:
               - type: assert-reachable
                 name: "2. Logstash API reachable"
                 brooklyn.config:
-                  endpointSensor: main.uri
+                  endpointSensor: main.uri.public
                   timeout: 5m
               - type: assert-restart-process
                 name: "3. Logstash restart process"

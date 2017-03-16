@@ -1,0 +1,120 @@
+brooklyn.catalog:
+  publish: &logstashPublish
+    name: &logstashName Logstash
+    description: &logstashDescription |
+      Logstash is an open source, server-side data processing pipeline that ingests data
+      from a multitude of sources simultaneously, transforms it, and then sends it to your favorite “stash.”
+    version: &logstashVersion "1.0.0-SNAPSHOT" # BROOKLYN_ELK_VERSION
+    iconUrl: &logstashIconUrl "https://static-www.elastic.co/assets/blt946bc636d34a70eb/icon-logstash-bb.svg"
+  items:
+    - id: logstash
+      name: *logstashName
+      version: *logstashVersion
+      iconUrl: *logstashIconUrl
+      description: *logstashDescription
+      publish: *logstashPublish
+      itemType: entity
+      item:
+        type: org.apache.brooklyn.entity.software.base.VanillaSoftwareProcess
+        name: *logstashName
+        provisioning.properties:
+          osFamily: centos
+          osVersionRegex: 7
+        brooklyn.parameters: &logstashParameters
+        - name: logstash.http.port
+          label: "Logstash http port"
+          description: |
+            The logstash http port
+          type: integer
+          default: 9600
+        - name: logstash.node.name
+          label: "Logstash node name"
+          description: |
+            The logstash node name
+          type: string
+        - name: logstash.pipeline.input
+          label: "Logstash pipeline input"
+          description: |
+            The logstash input
+          type: string
+          default: |
+            input { stdin { } }
+        - name: logstash.pipeline.filter
+          label: "Logstash pipeline filter"
+          description: |
+            The logstash filter
+          type: string
+        - name: logstash.pipeline.output
+          label: "Logstash pipeline output"
+          description: |
+            The logstash pipeline output
+          default: |
+            output { stdout { } }
+          type: string
+        brooklyn.config:
+          shell.env:
+            ENTITY_ID: $brooklyn:attributeWhenReady("entity.id")
+            LOGSTASH_HTTP_HOST: $brooklyn:attributeWhenReady("host.subnet.address")
+            LOGSTASH_HTTP_PORT: $brooklyn:config("logstash.http.port")
+            LOGSTASH_NODE_NAME: $brooklyn:config("logstash.node.name")
+            LOGSTASH_PIPELINE_INPUT: $brooklyn:config("logstash.pipeline.input")
+            LOGSTASH_PIPELINE_FILTER: $brooklyn:config("logstash.pipeline.filter")
+            LOGSTASH_PIPELINE_OUTPUT: $brooklyn:config("logstash.pipeline.output")
+          install.command: |
+            sudo rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+
+            sudo tee /etc/yum.repos.d/logstash.repo <<-EOF
+            [logstash-5.x]
+            name=Elastic repository for 5.x packages
+            baseurl=https://artifacts.elastic.co/packages/5.x/yum
+            gpgcheck=1
+            gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+            enabled=1
+            autorefresh=1
+            type=rpm-md
+            EOF
+
+            sudo yum update -y
+            sudo yum install -y augeas java-1.8.0-openjdk logstash
+          customize.command: |
+            sudo cp /etc/logstash/logstash.yml /etc/logstash/logstash.yml.original
+            if [ -z "${LOGSTASH_NODE_NAME}" ]; then LOGSTASH_NODE_NAME="${ENTITY_ID}"; fi
+            sudo tee /etc/logstash/logstash.yml <<-EOF
+            node.name: ${LOGSTASH_NODE_NAME}
+            http.host: ${LOGSTASH_HTTP_HOST}
+            http.port: ${LOGSTASH_HTTP_PORT}
+            path.data: /var/lib/logstash
+            path.config: /etc/logstash/conf.d
+            path.logs: /var/log/logstash
+            EOF
+
+            sudo truncate -s 0 /etc/logstash/conf.d/main.conf
+            if [ ! -z "${LOGSTASH_PIPELINE_INPUT}" ]; then
+              echo "${LOGSTASH_PIPELINE_INPUT}" | sudo tee -a /etc/logstash/conf.d/main.conf
+            fi
+
+            if [ ! -z "${LOGSTASH_PIPELINE_FILTER}" ]; then
+              echo "${LOGSTASH_PIPELINE_FILTER}" | sudo tee -a /etc/logstash/conf.d/main.conf
+            fi
+
+            if [ ! -z "${LOGSTASH_PIPELINE_OUTPUT}" ]; then
+              echo "${LOGSTASH_PIPELINE_OUTPUT}" | sudo tee -a /etc/logstash/conf.d/main.conf
+            fi
+          launch.command: sudo systemctl start logstash
+          stop.command: sudo systemctl stop logstash
+          checkRunning.command: sudo systemctl status logstash
+
+        brooklyn.enrichers:
+          - type: org.apache.brooklyn.enricher.stock.Transformer
+            brooklyn.config:
+              uniqueTag: logstash-main-uri-enricher
+              enricher.producer: $brooklyn:entity("logstash")
+              enricher.triggerSensors:
+                - $brooklyn:sensor("host.address")
+              enricher.targetSensor:
+                $brooklyn:sensor("main.uri.public")
+              enricher.targetValue:
+                $brooklyn:formatString:
+                  - "http://%s:%s"
+                  - $brooklyn:attributeWhenReady("host.address")
+                  - $brooklyn:config("logstash.http.port")

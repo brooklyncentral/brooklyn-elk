@@ -1,0 +1,19 @@
+name: "Logstash Example"
+location: <REPLACE_ME>
+services:
+  - type: logstash
+    id: logstash
+    brooklyn.config:
+      logstash.pipeline.input: |
+        input {
+          file {
+            path => "/var/log/*.log"
+          }
+        }
+      logstash.pipeline.output: |
+        output {
+          file {
+            codec => "json"
+            path  => "/tmp/output.json"
+          }
+        }

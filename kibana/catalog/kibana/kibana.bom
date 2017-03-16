@@ -1,0 +1,111 @@
+brooklyn.catalog:
+  publish: &kibanaPublish
+    name: &kibanaName "Kibana"
+    description: &kibanaDescription |
+      Kibana lets you visualize your Elasticsearch data and navigate the Elastic Stack,
+      so you can do anything from learning why you're getting paged at 2:00 a.m.
+      to understanding the impact rain might have on your quarterly numbers.
+    version: &kibanaVersion "1.0.0-SNAPSHOT" # BROOKLYN_ELK_VERSION
+    iconUrl: &kibanaIconUrl https://static-www.elastic.co/assets/blt282ae2420e32fc38/icon-kibana-bb.svg
+    license_code: "Apache-2.0"
+  items:
+  - id: kibana
+    name: *kibanaName
+    version: *kibanaVersion
+    iconUrl: *kibanaIconUrl
+    description: *kibanaDescription
+    publish: *kibnaPublish
+    itemType: entity
+    item:
+      type: org.apache.brooklyn.entity.software.base.VanillaSoftwareProcess
+      name: *kibanaName
+      provisioning.properties:
+        osFamily: centos
+        osVersionRegex: 7
+      brooklyn.parameters: &kibanaParameters
+      - name: kibana.server.port
+        label: "Server port"
+        description: |
+          The kibana server port
+        type: integer
+        default: 5601
+      - name: kibana.server.name
+        label: "Server name"
+        description: |
+          The kibana server name
+        type: string
+      - name: elasticsearch.url
+        label: "Elasticsearch URL"
+        description: |
+          The elasticsearch URL
+        type: string
+      - name: elasticsearch.username
+        label: "Elasticsearch username"
+        description: |
+          The elasticsearch username
+        type: string
+      - name: elasticsearch.password
+        label: "Elasticsearch password"
+        description: |
+          The elasticsearch password
+        type: string
+
+      brooklyn.config:
+        shell.env:
+          ENTITY_ID: $brooklyn:attributeWhenReady("entity.id")
+          KIBANA_SERVER_PORT: $brooklyn:config("kibana.server.port")
+          KIBANA_SERVER_HOST: $brooklyn:attributeWhenReady("host.subnet.address")
+          KIBANA_SERVER_NAME: $brooklyn:config("kibana.server.name")
+          ELASTICSEARCH_URL: $brooklyn:config("elasticsearch.url")
+          ELASTICSEARCH_USERNAME: $brooklyn:config("elasticsearch.username")
+          ELASTICSEARCH_PASSWORD: $brooklyn:config("elasticsearch.password")
+        install.command: |
+          sudo rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+
+          sudo tee /etc/yum.repos.d/kibana.repo <<-EOF
+          [kibana-5.x]
+          name=Kibana repository for 5.x packages
+          baseurl=https://artifacts.elastic.co/packages/5.x/yum
+          gpgcheck=1
+          gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+          enabled=1
+          autorefresh=1
+          type=rpm-md
+          EOF
+
+          sudo yum update -y
+          sudo yum install -y augeas kibana
+        customize.command: |
+          if [ -z "${KIBANA_SERVER_NAME}" ]; then KIBANA_SERVER_NAME="${ENTITY_ID}"; fi
+
+          sudo cp /etc/kibana/kibana.yml /etc/kibana/kibana.yml.original
+          sudo tee /etc/kibana/kibana.yml <<-EOF
+          server.port: ${KIBANA_SERVER_PORT}
+          server.host: ${KIBANA_SERVER_HOST}
+          server.name: ${KIBANA_SERVER_NAME}
+          elasticsearch.url: ${ELASTICSEARCH_URL}
+          EOF
+
+          if [ ! -z "${ELASTICSEARCH_USERNAME}" ] && [ ! -z "${ELASTICSEARCH_PASSWORD}" ]; then
+            sudo tee -a /etc/kibana/kibana.yml <<-EOF
+          elasticsearch.username: "${ELASTICSEARCH_USERNAME}"
+          elasticsearch.password: "${ELASTICSEARCH_PASSWORD}"
+          EOF
+          fi
+        launch.command: sudo systemctl start kibana
+        stop.command: sudo systemctl stop kibana
+        checkRunning.command: sudo systemctl status kibana
+      brooklyn.enrichers:
+        - type: org.apache.brooklyn.enricher.stock.Transformer
+          brooklyn.config:
+            uniqueTag: kibana-main-uri-enricher
+            enricher.producer: $brooklyn:entity("kibana")
+            enricher.triggerSensors:
+              - $brooklyn:sensor("host.address")
+            enricher.targetSensor:
+              $brooklyn:sensor("main.uri.public")
+            enricher.targetValue:
+              $brooklyn:formatString:
+                - "http://%s:%s"
+                - $brooklyn:attributeWhenReady("host.address")
+                - $brooklyn:config("kibana.server.port")

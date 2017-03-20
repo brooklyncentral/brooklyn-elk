@@ -1,0 +1,3 @@
+brooklyn.catalog:
+  items:
+    - "classpath://logstash/logstash.bom"

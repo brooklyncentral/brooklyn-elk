@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>brooklyn-elasticsearch</artifactId>
+    <packaging>bundle</packaging>
     <name>Brooklyn :: Elasticsearch</name>
 
     <build>
@@ -27,9 +28,14 @@
                         <configuration>
                             <artifacts>
                                 <artifact>
-                                    <file>${project.basedir}/catalog/elasticsearch/elasticsearch.bom</file>
+                                    <file>${project.build.outputDirectory}/elasticsearch/elasticsearch.bom</file>
                                     <classifier>elasticsearch</classifier>
                                     <type>bom</type>
+                                </artifact>
+                                <artifact>
+                                    <file>${project.build.outputDirectory}/feature.xml</file>
+                                    <classifier>features</classifier>
+                                    <type>xml</type>
                                 </artifact>
                             </artifacts>
                         </configuration>

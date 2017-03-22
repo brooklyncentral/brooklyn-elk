@@ -121,10 +121,23 @@ brooklyn.catalog:
               enricher.triggerSensors:
                 - $brooklyn:sensor("host.address")
               enricher.targetSensor:
+                $brooklyn:sensor("main.uri")
+              enricher.targetValue:
+                $brooklyn:formatString:
+                  - "http://%s:%s/"
+                  - $brooklyn:attributeWhenReady("host.address")
+                  - $brooklyn:config("elasticsearch.http.port")
+          - type: org.apache.brooklyn.enricher.stock.Transformer
+            brooklyn.config:
+              uniqueTag: elasticsearch-main-uri-enricher
+              enricher.producer: $brooklyn:entity("elasticsearch-node")
+              enricher.triggerSensors:
+                - $brooklyn:sensor("host.address")
+              enricher.targetSensor:
                 $brooklyn:sensor("main.uri.public")
               enricher.targetValue:
                 $brooklyn:formatString:
-                  - "http://%s:%s"
+                  - "http://%s:%s/"
                   - $brooklyn:attributeWhenReady("host.address")
                   - $brooklyn:config("elasticsearch.http.port")
           - type: org.apache.brooklyn.enricher.stock.Transformer
@@ -137,7 +150,7 @@ brooklyn.catalog:
                 $brooklyn:sensor("main.uri.private")
               enricher.targetValue:
                 $brooklyn:formatString:
-                  - "http://%s:%s"
+                  - "http://%s:%s/"
                   - $brooklyn:attributeWhenReady("host.subnet.address")
                   - $brooklyn:config("elasticsearch.http.port")
     - id: elasticsearch-cluster

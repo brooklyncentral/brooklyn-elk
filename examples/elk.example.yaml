@@ -1,0 +1,55 @@
+name: "ELK Sample Architecture"
+location: <REPLACE_ME>
+services:
+  - type: elasticsearch-node
+    id: elasticsearch-node
+  - type: kibana
+    brooklyn.config:
+      elasticsearch.url: $brooklyn:component("sibling","elasticsearch-node").attributeWhenReady("main.uri.public")
+
+#  Example app that creates logs
+  - name: "Sample App (producing logs)"
+    type: org.apache.brooklyn.entity.software.base.VanillaSoftwareProcess
+    brooklyn.config:
+      children.startable.mode: BACKGROUND
+      shell.env:
+        ENTITY_ID: $brooklyn:attributeWhenReady("entity.id")
+        INSTALL_DIR: $brooklyn:attributeWhenReady("install.dir")
+      install.command: |
+        sudo mkdir -p /var/log/elk-example
+        tee ${INSTALL_DIR}/log-maker.sh <<-EOF
+        #!/usr/bin/env bash
+        sudo touch /var/log/elk-example/sample.log
+        while [ true ]; do
+        	echo "$(date -R) INFO - Entity [${ENTITY_ID}] reports disk usage $(df -h . | awk 'NR==2 {print $5 " ( "$3 " of " $2 " )"}')" >> /var/log/elk-example/sample.log
+        	sleep $((1 + RANDOM % 30))
+        	echo "$(date -R) DEBUG - Entity [${ENTITY_ID}] reports log size of $(stat --format='%s' /var/log/elk-example/sample.log)bytes" >> /var/log/elk-example/sample.log
+        	sleep $((1 + RANDOM % 30))
+        done
+        EOF
+        chmod u+x ${INSTALL_DIR}/log-maker.sh
+      launch.command: |
+        sudo ${INSTALL_DIR}/log-maker.sh & echo $! > ${PID_FILE}
+      stop.command: |
+        sudo kill $(cat ${PID_FILE})
+    brooklyn.children:
+
+# Logstash instance placed on node to send logs to elasticsearch
+      - type: logstash
+        id: logstash
+        brooklyn.config:
+          logstash.pipeline.input: |
+            input {
+              file {
+                path => "/var/log/elk-example/sample.log"
+              }
+            }
+          logstash.pipeline.output:
+            $brooklyn:formatString:
+              - |
+                output {
+                  elasticsearch {
+                    hosts => ["%s"]
+                  }
+                }
+              - $brooklyn:component("elasticsearch-node").attributeWhenReady("main.uri.private")

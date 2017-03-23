@@ -107,7 +107,7 @@ brooklyn.catalog:
               $brooklyn:sensor("main.uri.public")
             enricher.targetValue:
               $brooklyn:formatString:
-                - "http://%s:%s/"
+                - "http://%s:%s/app/kibana"
                 - $brooklyn:attributeWhenReady("host.address")
                 - $brooklyn:config("kibana.server.port")
         - type: org.apache.brooklyn.enricher.stock.Transformer
@@ -120,6 +120,6 @@ brooklyn.catalog:
               $brooklyn:sensor("main.uri")
             enricher.targetValue:
               $brooklyn:formatString:
-                - "http://%s:%s/"
+                - "http://%s:%s/app/kibana"
                 - $brooklyn:attributeWhenReady("host.address")
                 - $brooklyn:config("kibana.server.port")

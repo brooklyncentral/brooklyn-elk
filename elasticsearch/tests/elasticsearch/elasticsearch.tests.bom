@@ -58,11 +58,15 @@ brooklyn.catalog:
                       equals: 3
                 - type: org.apache.brooklyn.test.framework.SimpleShellCommandTest
                   name: "2.2 Elasticsearch reports cluster size 3"
-                  target: $brooklyn:component("elasticsearch-cluster").attributeWhenReady("cluster.first.entity")
-                  command: |
-                    curl -s -XGET "http://${HOSTNAME}:9200/_cluster/health" | grep '"number_of_nodes":3'
-                  assertStatus:
-                    equals: 0
+                  brooklyn.config:
+                    target: $brooklyn:component("elasticsearch-cluster").attributeWhenReady("cluster.first.entity")
+                    shell.env:
+                      ELASTICSEARCH_MAIN_URI: $brooklyn:component("elasticsearch-cluster").attributeWhenReady("cluster.first.entity").attributeWhenReady("main.uri.private")
+                    command: |
+                      echo "Fetching clucster status from ${ELASTICSEARCH_MAIN_URI}"
+                      curl -s -XGET "${ELASTICSEARCH_MAIN_URI}_cluster/health" | grep '"number_of_nodes":3'
+                    assertStatus:
+                      equals: 0
                 - type: invoke-effector
                   name: "2.3 Invoke resize UP"
                   brooklyn.config:
@@ -77,11 +81,15 @@ brooklyn.catalog:
                       equals: 5
                 - type: org.apache.brooklyn.test.framework.SimpleShellCommandTest
                   name: "2.5 Elasticsearch reports cluster size 5"
-                  target: $brooklyn:component("elasticsearch-cluster").attributeWhenReady("cluster.first.entity")
-                  command: |
-                    curl -s -XGET "http://${HOSTNAME}:9200/_cluster/health" | grep '"number_of_nodes":5'
-                  assertStatus:
-                    equals: 0
+                  brooklyn.config:
+                    target: $brooklyn:component("elasticsearch-cluster").attributeWhenReady("cluster.first.entity")
+                    shell.env:
+                      ELASTICSEARCH_MAIN_URI: $brooklyn:component("elasticsearch-cluster").attributeWhenReady("cluster.first.entity").attributeWhenReady("main.uri.private")
+                    command: |
+                      echo "Fetching clucster status from ${ELASTICSEARCH_MAIN_URI}"
+                      curl -s -XGET "${ELASTICSEARCH_MAIN_URI}_cluster/health" | grep '"number_of_nodes":5'
+                    assertStatus:
+                      equals: 0
                 - type: invoke-effector
                   name: "2.6 Invoke resize DOWN"
                   brooklyn.config:
@@ -98,15 +106,21 @@ brooklyn.catalog:
                   name: "2.8 Elasticsearch reports cluster size 3"
                   brooklyn.config:
                     target: $brooklyn:component("elasticsearch-cluster").attributeWhenReady("cluster.first.entity")
+                    shell.env:
+                      ELASTICSEARCH_MAIN_URI: $brooklyn:component("elasticsearch-cluster").attributeWhenReady("cluster.first.entity").attributeWhenReady("main.uri.private")
                     command: |
-                      curl -s -XGET "http://${HOSTNAME}:9200/_cluster/health" | grep '"number_of_nodes":3'
+                      echo "Fetching clucster status from ${ELASTICSEARCH_MAIN_URI}"
+                      curl -s -XGET "${ELASTICSEARCH_MAIN_URI}_cluster/health" | grep '"number_of_nodes":3'
                     assertStatus:
                       equals: 0
               - type: org.apache.brooklyn.test.framework.SimpleShellCommandTest
                 name: "3. Elasticsearch cluster status green"
                 brooklyn.config:
                   target: $brooklyn:component("elasticsearch-cluster").attributeWhenReady("cluster.first.entity")
+                  shell.env:
+                    ELASTICSEARCH_MAIN_URI: $brooklyn:component("elasticsearch-cluster").attributeWhenReady("cluster.first.entity").attributeWhenReady("main.uri.private")
                   command: |
-                    curl -s -XGET "http://${HOSTNAME}:9200/_cluster/health" | grep '"status":"green"'
+                    echo "Fetching clucster status from ${ELASTICSEARCH_MAIN_URI}"
+                    curl -s -XGET "${ELASTICSEARCH_MAIN_URI}_cluster/health" | grep '"status":"green"'
                   assertStatus:
                     equals: 0

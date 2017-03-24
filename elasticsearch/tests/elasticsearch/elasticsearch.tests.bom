@@ -39,10 +39,12 @@ brooklyn.catalog:
         services:
           - type: elasticsearch-cluster
             id: elasticsearch-cluster
+            brooklyn.config:
+              cluster.initial.size: 1
           - type: test-case
             name: "Elasticsearch Cluster Tests"
             brooklyn.config:
-              timeout: 1h
+              timeout: 30m
               targetId: elasticsearch-cluster
             brooklyn.children:
               - type: assert-up-and-running-initial
@@ -51,76 +53,74 @@ brooklyn.catalog:
                 name: "2. Elasticsearch cluser scaling tests"
                 brooklyn.children:
                 - type: assert-sensor
-                  name: "2.1 Elasticsearch cluster initial size is 3"
+                  name: "2.1 Elasticsearch cluster initial size is 1"
                   brooklyn.config:
                     sensor: "group.members.count"
                     assert:
-                      equals: 3
+                      equals: 1
                 - type: org.apache.brooklyn.test.framework.SimpleShellCommandTest
-                  name: "2.2 Elasticsearch reports cluster size 3"
+                  name: "2.2 Elasticsearch reports cluster size 1 and status green"
                   brooklyn.config:
                     target: $brooklyn:component("elasticsearch-cluster").attributeWhenReady("cluster.first.entity")
                     shell.env:
                       ELASTICSEARCH_MAIN_URI: $brooklyn:component("elasticsearch-cluster").attributeWhenReady("cluster.first.entity").attributeWhenReady("main.uri.private")
                     command: |
-                      echo "Fetching clucster status from ${ELASTICSEARCH_MAIN_URI}"
-                      curl -s -XGET "${ELASTICSEARCH_MAIN_URI}_cluster/health" | grep '"number_of_nodes":3'
+                      set -e
+                      CLUSTER_HEALTH=$(curl -s -XGET "${ELASTICSEARCH_MAIN_URI}_cluster/health")
+                      echo "${CLUSTER_HEALTH}"
+                      echo "${CLUSTER_HEALTH}" | grep '"number_of_nodes":1'
+                      echo "${CLUSTER_HEALTH}" | grep '"status":"green"'
                     assertStatus:
                       equals: 0
                 - type: invoke-effector
-                  name: "2.3 Invoke resize UP"
+                  name: "2.3 Invoke resize UP (+2)"
                   brooklyn.config:
                     effector: resizeByDelta
                     params:
                       delta: "+2"
                 - type: assert-sensor
-                  name: "2.4 Elasticsearch cluster size is 5"
-                  brooklyn.config:
-                    sensor: "group.members.count"
-                    assert:
-                      equals: 5
-                - type: org.apache.brooklyn.test.framework.SimpleShellCommandTest
-                  name: "2.5 Elasticsearch reports cluster size 5"
-                  brooklyn.config:
-                    target: $brooklyn:component("elasticsearch-cluster").attributeWhenReady("cluster.first.entity")
-                    shell.env:
-                      ELASTICSEARCH_MAIN_URI: $brooklyn:component("elasticsearch-cluster").attributeWhenReady("cluster.first.entity").attributeWhenReady("main.uri.private")
-                    command: |
-                      echo "Fetching clucster status from ${ELASTICSEARCH_MAIN_URI}"
-                      curl -s -XGET "${ELASTICSEARCH_MAIN_URI}_cluster/health" | grep '"number_of_nodes":5'
-                    assertStatus:
-                      equals: 0
-                - type: invoke-effector
-                  name: "2.6 Invoke resize DOWN"
-                  brooklyn.config:
-                    effector: resizeByDelta
-                    params:
-                      delta: "-2"
-                - type: assert-sensor
-                  name: "2.7 Elasticsearch cluster size is 3"
+                  name: "2.4 Elasticsearch cluster size is 3"
                   brooklyn.config:
                     sensor: "group.members.count"
                     assert:
                       equals: 3
                 - type: org.apache.brooklyn.test.framework.SimpleShellCommandTest
-                  name: "2.8 Elasticsearch reports cluster size 3"
+                  name: "2.5 Elasticsearch reports cluster size 3 and status green"
                   brooklyn.config:
                     target: $brooklyn:component("elasticsearch-cluster").attributeWhenReady("cluster.first.entity")
                     shell.env:
                       ELASTICSEARCH_MAIN_URI: $brooklyn:component("elasticsearch-cluster").attributeWhenReady("cluster.first.entity").attributeWhenReady("main.uri.private")
                     command: |
-                      echo "Fetching clucster status from ${ELASTICSEARCH_MAIN_URI}"
-                      curl -s -XGET "${ELASTICSEARCH_MAIN_URI}_cluster/health" | grep '"number_of_nodes":3'
+                      set -e
+                      CLUSTER_HEALTH=$(curl -s -XGET "${ELASTICSEARCH_MAIN_URI}_cluster/health")
+                      echo "${CLUSTER_HEALTH}"
+                      echo "${CLUSTER_HEALTH}" | grep '"number_of_nodes":3'
+                      echo "${CLUSTER_HEALTH}" | grep '"status":"green"'
                     assertStatus:
                       equals: 0
-              - type: org.apache.brooklyn.test.framework.SimpleShellCommandTest
-                name: "3. Elasticsearch cluster status green"
-                brooklyn.config:
-                  target: $brooklyn:component("elasticsearch-cluster").attributeWhenReady("cluster.first.entity")
-                  shell.env:
-                    ELASTICSEARCH_MAIN_URI: $brooklyn:component("elasticsearch-cluster").attributeWhenReady("cluster.first.entity").attributeWhenReady("main.uri.private")
-                  command: |
-                    echo "Fetching clucster status from ${ELASTICSEARCH_MAIN_URI}"
-                    curl -s -XGET "${ELASTICSEARCH_MAIN_URI}_cluster/health" | grep '"status":"green"'
-                  assertStatus:
-                    equals: 0
+                - type: invoke-effector
+                  name: "2.6 Invoke resize DOWN (-1)"
+                  brooklyn.config:
+                    effector: resizeByDelta
+                    params:
+                      delta: "-1"
+                - type: assert-sensor
+                  name: "2.7 Elasticsearch cluster size is 2"
+                  brooklyn.config:
+                    sensor: "group.members.count"
+                    assert:
+                      equals: 2
+                - type: org.apache.brooklyn.test.framework.SimpleShellCommandTest
+                  name: "2.8 Elasticsearch reports cluster size 2 and status green"
+                  brooklyn.config:
+                    target: $brooklyn:component("elasticsearch-cluster").attributeWhenReady("cluster.first.entity")
+                    shell.env:
+                      ELASTICSEARCH_MAIN_URI: $brooklyn:component("elasticsearch-cluster").attributeWhenReady("cluster.first.entity").attributeWhenReady("main.uri.private")
+                    command: |
+                      set -e
+                      CLUSTER_HEALTH=$(curl -s -XGET "${ELASTICSEARCH_MAIN_URI}_cluster/health")
+                      echo "${CLUSTER_HEALTH}"
+                      echo "${CLUSTER_HEALTH}" | grep '"number_of_nodes":2'
+                      echo "${CLUSTER_HEALTH}" | grep '"status":"green"'
+                    assertStatus:
+                      equals: 0

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" name="brooklyn-elk-${project.version}">
+    <repository>mvn:${project.groupId}/brooklyn-elasticsearch/${project.version}/xml/features</repository>
+    <repository>mvn:${project.groupId}/brooklyn-kibana/${project.version}/xml/features</repository>
+    <repository>mvn:${project.groupId}/brooklyn-logstash/${project.version}/xml/features</repository>
+
+    <feature name="brooklyn-elk" version="${project.version}">
+        <feature>brooklyn-elasticsearch</feature>
+        <feature>brooklyn-logstash</feature>
+        <feature>brooklyn-kibana</feature>
+    </feature>
+
+    <feature name="brooklyn-elk-boms" version="${project.version}">
+        <feature>brooklyn-elasticsearch-boms</feature>
+        <feature>brooklyn-logstash-boms</feature>
+        <feature>brooklyn-kibana-boms</feature>
+    </feature>
+</features>

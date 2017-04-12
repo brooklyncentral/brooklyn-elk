@@ -41,6 +41,7 @@ brooklyn.catalog:
             id: elasticsearch-cluster
             brooklyn.config:
               cluster.initial.size: 1
+              elasticsearch.bind.address: _site_
           - type: test-case
             name: "Elasticsearch Cluster Tests"
             brooklyn.config:

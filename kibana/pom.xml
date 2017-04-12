@@ -8,7 +8,7 @@
     <parent>
         <groupId>io.brooklyn.elk</groupId>
         <artifactId>brooklyn-elk</artifactId>
-        <version>1.0.1-SNAPSHOT</version> <!-- BROOKLYN_ELK_VERSION -->
+        <version>1.0.1</version> <!-- BROOKLYN_ELK_VERSION -->
     </parent>
 
     <artifactId>brooklyn-kibana</artifactId>

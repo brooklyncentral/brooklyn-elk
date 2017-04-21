@@ -27,6 +27,11 @@ brooklyn.catalog:
             The logstash http port
           type: integer
           default: 9600
+        - name: logstash.bind.address
+          label: "Logstash bind address"
+          description: |
+            The logstash bind address
+          type: string
         - name: logstash.node.name
           label: "Logstash node name"
           description: |
@@ -54,7 +59,8 @@ brooklyn.catalog:
         brooklyn.config:
           shell.env:
             ENTITY_ID: $brooklyn:attributeWhenReady("entity.id")
-            LOGSTASH_HTTP_HOST: $brooklyn:attributeWhenReady("host.subnet.address")
+            HOST_SUBNET_ADDRESS: $brooklyn:attributeWhenReady("host.subnet.address")
+            LOGSTASH_HTTP_HOST: $brooklyn:config("logstash.bind.address")
             LOGSTASH_HTTP_PORT: $brooklyn:config("logstash.http.port")
             LOGSTASH_NODE_NAME: $brooklyn:config("logstash.node.name")
             LOGSTASH_PIPELINE_INPUT: $brooklyn:config("logstash.pipeline.input")
@@ -79,6 +85,7 @@ brooklyn.catalog:
           customize.command: |
             sudo cp /etc/logstash/logstash.yml /etc/logstash/logstash.yml.original
             if [ -z "${LOGSTASH_NODE_NAME}" ]; then LOGSTASH_NODE_NAME="${ENTITY_ID}"; fi
+            if [ -z "${LOGSTASH_HTTP_HOST}" ]; then LOGSTASH_HTTP_HOST="${HOST_SUBNET_ADDRESS}"; fi
             sudo tee /etc/logstash/logstash.yml <<-EOF
             node.name: ${LOGSTASH_NODE_NAME}
             http.host: ${LOGSTASH_HTTP_HOST}

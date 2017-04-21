@@ -35,6 +35,11 @@ brooklyn.catalog:
         description: |
           The kibana server name
         type: string
+      - name: kibana.server.bind.address
+        label: "Bind address"
+        description: |
+          The kibana server bind address
+        type: string
       - name: elasticsearch.url
         label: "Elasticsearch URL"
         description: |
@@ -54,8 +59,9 @@ brooklyn.catalog:
       brooklyn.config:
         shell.env:
           ENTITY_ID: $brooklyn:attributeWhenReady("entity.id")
+          HOST_SUBNET_ADDRESS: $brooklyn:attributeWhenReady("host.subnet.address")
           KIBANA_SERVER_PORT: $brooklyn:config("kibana.server.port")
-          KIBANA_SERVER_HOST: $brooklyn:attributeWhenReady("host.subnet.address")
+          KIBANA_SERVER_HOST: $brooklyn:config("kibana.server.bind.address")
           KIBANA_SERVER_NAME: $brooklyn:config("kibana.server.name")
           ELASTICSEARCH_URL: $brooklyn:config("elasticsearch.url")
           ELASTICSEARCH_USERNAME: $brooklyn:config("elasticsearch.username")
@@ -78,6 +84,7 @@ brooklyn.catalog:
           sudo yum install -y augeas kibana
         customize.command: |
           if [ -z "${KIBANA_SERVER_NAME}" ]; then KIBANA_SERVER_NAME="${ENTITY_ID}"; fi
+          if [ -z "${KIBANA_SERVER_HOST}" ]; then KIBANA_SERVER_HOST="${HOST_SUBNET_ADDRESS}"; fi
 
           sudo cp /etc/kibana/kibana.yml /etc/kibana/kibana.yml.original
           sudo tee /etc/kibana/kibana.yml <<-EOF

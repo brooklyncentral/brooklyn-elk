@@ -12,6 +12,8 @@ brooklyn.catalog:
         services:
           - type: elasticsearch-node
             id: elasticsearch-node
+            brooklyn.config:
+              elasticsearch.bind.address: 0.0.0.0
           - type: test-case
             name: "Elasticsearch Node Tests"
             brooklyn.config:
@@ -41,7 +43,7 @@ brooklyn.catalog:
             id: elasticsearch-cluster
             brooklyn.config:
               cluster.initial.size: 1
-              elasticsearch.bind.address: _site_
+              elasticsearch.bind.address: 0.0.0.0
           - type: test-case
             name: "Elasticsearch Cluster Tests"
             brooklyn.config:

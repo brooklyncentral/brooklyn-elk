@@ -37,7 +37,14 @@ brooklyn.catalog:
       name: elasticsearch.bind.address
       label: "Bind address"
       description: |
-        The ip address to bind on - defaults to host.subnet.address
+        The ip address to bind on - defaults to 0.0.0.0
+      type: string
+      default: 0.0.0.0
+    elasticSearch.publish.address: &elasticsearchPublishAddress
+      name: elasticsearch.publish.address
+      label: "Publish address"
+      description: |
+        The ip address to publish - defaults to host.subnet.address
       type: string
   items:
     - id: elasticsearch-node
@@ -57,6 +64,7 @@ brooklyn.catalog:
           - *elasticsearchHttpPort
           - *elasticsearchTcpPort
           - *elasticsearchBindAddress
+          - *elasticsearchPublishAddress
         brooklyn.config:
           provisioning.properties:
             osFamily: centos
@@ -70,6 +78,7 @@ brooklyn.catalog:
             ELASTICSEARCH_HTTP_PORT: $brooklyn:config("elasticsearch.http.port")
             ELASTICSEARCH_TCP_PORT: $brooklyn:config("elasticsearch.tcp.port")
             ELASTICSEARCH_BIND_ADDRESS: $brooklyn:config("elasticsearch.bind.address")
+            ELASTICSEARCH_PUBLISH_ADDRESS: $brooklyn:config("elasticsearch.publish.address")
             APPLICATION_ID: $brooklyn:attributeWhenReady("application.id")
             ENTITY_ID: $brooklyn:attributeWhenReady("entity.id")
             IP_ADDRESS: $brooklyn:attributeWhenReady("host.subnet.address")
@@ -93,11 +102,13 @@ brooklyn.catalog:
             if [ -z "${ELASTICSEARCH_CLUSTER_NAME}" ]; then ELASTICSEARCH_CLUSTER_NAME="${APPLICATION_ID}"; fi
             if [ -z "${ELASTICSEARCH_NODE_NAME}" ]; then ELASTICSEARCH_NODE_NAME="${ENTITY_ID}"; fi
             if [ -z "${ELASTICSEARCH_BIND_ADDRESS}" ]; then ELASTICSEARCH_BIND_ADDRESS="${IP_ADDRESS}"; fi
+            if [ -z "${ELASTICSEARCH_PUBLISH_ADDRESS}" ]; then ELASTICSEARCH_PUBLISH_ADDRESS="${IP_ADDRESS}"; fi
 
             sudo tee /etc/elasticsearch/elasticsearch.yml <<-EOF
             cluster.name: ${ELASTICSEARCH_CLUSTER_NAME}
             node.name: ${ELASTICSEARCH_NODE_NAME}
-            network.host: ${ELASTICSEARCH_BIND_ADDRESS}
+            network.publish_host: ${ELASTICSEARCH_PUBLISH_ADDRESS}
+            network.bind_host: ${ELASTICSEARCH_BIND_ADDRESS}
             http.port: ${ELASTICSEARCH_HTTP_PORT}
             transport.tcp.port: ${ELASTICSEARCH_TCP_PORT}
             bootstrap.memory_lock: true
@@ -178,6 +189,7 @@ brooklyn.catalog:
           - *elasticsearchHttpPort
           - *elasticsearchTcpPort
           - *elasticsearchBindAddress
+          - *elasticsearchPublishAddress
         brooklyn.config:
           cluster.initial.size: 3
           dynamiccluster.memberspec:

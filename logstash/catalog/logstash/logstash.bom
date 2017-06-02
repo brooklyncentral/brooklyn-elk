@@ -30,8 +30,9 @@ brooklyn.catalog:
         - name: logstash.bind.address
           label: "Logstash bind address"
           description: |
-            The logstash bind address
+            The logstash bind address (defaults to 0.0.0.0)
           type: string
+          default: 0.0.0.0
         - name: logstash.node.name
           label: "Logstash node name"
           description: |

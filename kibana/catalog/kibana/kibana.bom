@@ -38,8 +38,9 @@ brooklyn.catalog:
       - name: kibana.server.bind.address
         label: "Bind address"
         description: |
-          The kibana server bind address
+          The kibana server bind address (defaulting to 0.0.0.0)
         type: string
+        default: 0.0.0.0
       - name: elasticsearch.url
         label: "Elasticsearch URL"
         description: |

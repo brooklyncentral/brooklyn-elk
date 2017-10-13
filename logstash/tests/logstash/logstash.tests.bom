@@ -1,5 +1,5 @@
 brooklyn.catalog:
-  version: &logstashVersion "2.0.1-SNAPSHOT" # BROOKLYN_ELK_VERSION
+  version: &logstashVersion "2.0.1" # BROOKLYN_ELK_VERSION
   iconUrl: &logstashIconUrl "https://static-www.elastic.co/assets/blt946bc636d34a70eb/icon-logstash-bb.svg"
   items:
     - "https://raw.githubusercontent.com/brooklyncentral/common-catalog-utils/master/common-tests/src/main/resources/commontests/common.tests.bom"

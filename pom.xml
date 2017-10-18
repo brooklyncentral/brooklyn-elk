@@ -8,6 +8,13 @@
     <artifactId>brooklyn-elk</artifactId>
     <version>2.0.2-SNAPSHOT</version> <!-- BROOKLYN_ELK_VERSION -->
     <packaging>pom</packaging>
+   
+    <parent>
+        <groupId>io.brooklyn</groupId>
+        <artifactId>brooklyncentral-parent</artifactId>
+        <version>1.0.0</version>
+    </parent>
+ 
     <name>Brooklyn :: ELK</name>
     <description>
         Brooklyn entities for an ELK stack
@@ -102,45 +109,4 @@
         </plugins>
     </build>
 
-    <profiles>
-        <profile>
-            <id>sonatype-nexus-repo</id>
-            <activation>
-                <property>
-                    <name>deployTo</name>
-                    <value>sonatype</value>
-                </property>
-            </activation>
-            <distributionManagement>
-                <repository>
-                    <id>sonatype-nexus-staging</id>
-                    <name>Nexus Release Repository</name>
-                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-                </repository>
-                <snapshotRepository>
-                    <id>sonatype-nexus-snapshots</id>
-                    <name>Sonatype Nexus Snapshots</name>
-                    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-                </snapshotRepository>
-            </distributionManagement>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>

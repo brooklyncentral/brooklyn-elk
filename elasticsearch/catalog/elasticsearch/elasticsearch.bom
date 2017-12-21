@@ -137,7 +137,6 @@ brooklyn.catalog:
           - type: org.apache.brooklyn.enricher.stock.Transformer
             brooklyn.config:
               uniqueTag: elasticsearch-main-uri-enricher
-              enricher.producer: $brooklyn:entity("elasticsearch-node")
               enricher.triggerSensors:
                 - $brooklyn:sensor("host.address")
               enricher.targetSensor:
@@ -150,7 +149,6 @@ brooklyn.catalog:
           - type: org.apache.brooklyn.enricher.stock.Transformer
             brooklyn.config:
               uniqueTag: elasticsearch-main-uri-enricher
-              enricher.producer: $brooklyn:entity("elasticsearch-node")
               enricher.triggerSensors:
                 - $brooklyn:sensor("host.address")
               enricher.targetSensor:
@@ -163,7 +161,6 @@ brooklyn.catalog:
           - type: org.apache.brooklyn.enricher.stock.Transformer
             brooklyn.config:
               uniqueTag: elasticsearch-main-uri-private-enricher
-              enricher.producer: $brooklyn:entity("elasticsearch-node")
               enricher.triggerSensors:
                 - $brooklyn:sensor("host.subnet.address")
               enricher.targetSensor:

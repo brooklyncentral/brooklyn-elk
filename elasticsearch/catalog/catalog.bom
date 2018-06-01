@@ -1,5 +1,5 @@
 brooklyn.catalog:
-  bundle: io.brooklyn.elk.brooklyn-elk
+  bundle: io.brooklyn.elk.brooklyn-elk.elasticsearch
   version: 1.0.1   # BROOLYN_ELK_VERSION
   items:
     - "classpath://elasticsearch/elasticsearch.bom"

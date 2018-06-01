@@ -1,3 +1,5 @@
 brooklyn.catalog:
+  bundle: io.brooklyn.elk.brooklyn-elk.kibana
+  version: 1.0.1   # BROOLYN_ELK_VERSION
   items:
     - "classpath://kibana/kibana.bom"

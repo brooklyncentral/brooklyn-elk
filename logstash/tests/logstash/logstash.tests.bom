@@ -52,7 +52,6 @@ brooklyn.catalog:
                     command: |
                       sudo mkdir -p /qa-test
                       sudo touch /qa-test/input.log
-                      sudo touch /qa-test/output.json
                       sudo chmod -R 777 /qa-test
                       sudo chown -R logstash:logstash /qa-test
                       sudo echo "$(date -u +"%Y-%m-%dT%H:%M:%SZ") - test log message id [$(uuidgen)]" | tee -a /qa-test/input.log

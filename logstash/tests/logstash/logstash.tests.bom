@@ -17,6 +17,7 @@ brooklyn.catalog:
                 input {
                   file {
                     path => "/qa-test/*.log"
+                    start_position => "beginning"
                   }
                 }
               logstash.pipeline.output: |

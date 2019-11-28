@@ -6,7 +6,8 @@ brooklyn.catalog:
       so you can do anything from learning why you're getting paged at 2:00 a.m.
       to understanding the impact rain might have on your quarterly numbers.
     version: &kibanaVersion "2.0.2-SNAPSHOT" # BROOKLYN_ELK_VERSION
-    iconUrl: &kibanaIconUrl https://static-www.elastic.co/assets/blt282ae2420e32fc38/icon-kibana-bb.svg
+    iconUrl: &kibanaIconUrl https://raw.githubusercontent.com/brooklyncentral/brooklyn-elk/master/kibana/kibana.png
+
     license_code: "Apache-2.0"
   items:
   - id: kibana

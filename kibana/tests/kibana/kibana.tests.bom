@@ -1,5 +1,5 @@
 brooklyn.catalog:
-  version: &kibanaVersion "2.0.2-SNAPSHOT" # BROOKLYN_ELK_VERSION
+  version: &kibanaVersion "2.0.2" # BROOKLYN_ELK_VERSION
   iconUrl: &kibanaIconUrl "https://static-www.elastic.co/assets/blt282ae2420e32fc38/icon-kibana-bb.svg"
   items:
     - "https://raw.githubusercontent.com/brooklyncentral/common-catalog-utils/master/common-tests/src/main/resources/commontests/common.tests.bom"

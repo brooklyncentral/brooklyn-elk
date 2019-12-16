@@ -5,7 +5,7 @@ brooklyn.catalog:
       Kibana lets you visualize your Elasticsearch data and navigate the Elastic Stack,
       so you can do anything from learning why you're getting paged at 2:00 a.m.
       to understanding the impact rain might have on your quarterly numbers.
-    version: &kibanaVersion "2.0.2-SNAPSHOT" # BROOKLYN_ELK_VERSION
+    version: &kibanaVersion "2.0.2" # BROOKLYN_ELK_VERSION
     iconUrl: &kibanaIconUrl https://raw.githubusercontent.com/brooklyncentral/brooklyn-elk/master/kibana/kibana.png
 
     license_code: "Apache-2.0"

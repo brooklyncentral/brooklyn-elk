@@ -1,6 +1,6 @@
 brooklyn.catalog:
   publish: &elasticsearchPublish
-    version: &elasticsearchVersion "2.0.2-SNAPSHOT" # BROOKLYN_ELK_VERSION
+    version: &elasticsearchVersion "2.0.2" # BROOKLYN_ELK_VERSION
     iconUrl: &elasticsearchIconUrl https://raw.githubusercontent.com/brooklyncentral/brooklyn-elk/master/elasticsearch/elastic.gif
     description: &elasticsearchDescription
       Elasticsearch is a distributed, RESTful search and analytics engine capable of solving a growing number of use cases.

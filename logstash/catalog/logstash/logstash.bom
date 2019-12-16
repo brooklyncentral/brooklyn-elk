@@ -4,7 +4,7 @@ brooklyn.catalog:
     description: &logstashDescription |
       Logstash is an open source, server-side data processing pipeline that ingests data
       from a multitude of sources simultaneously, transforms it, and then sends it to your favorite “stash.”
-    version: &logstashVersion "2.0.2-SNAPSHOT" # BROOKLYN_ELK_VERSION
+    version: &logstashVersion "2.0.2" # BROOKLYN_ELK_VERSION
     iconUrl: &logstashIconUrl https://raw.githubusercontent.com/brooklyncentral/brooklyn-elk/master/logstash/logstash.png
 
   items:

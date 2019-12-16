@@ -1,5 +1,5 @@
 brooklyn.catalog:
-  version: &elasticsearchVersion "2.0.2-SNAPSHOT" # BROOKLYN_ELK_VERSION
+  version: &elasticsearchVersion "2.0.3-SNAPSHOT" # BROOKLYN_ELK_VERSION
   iconUrl: &elasticsearchIconUrl "https://static-www.elastic.co/assets/blt9a26f88bfbd20eb5/icon-elasticsearch-bb.svg"
   items:
     - "https://raw.githubusercontent.com/brooklyncentral/common-catalog-utils/master/common-tests/src/main/resources/commontests/common.tests.bom"

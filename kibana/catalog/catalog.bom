@@ -1,5 +1,5 @@
 brooklyn.catalog:
   bundle: io.brooklyn.elk.brooklyn-kibana
-  version: 2.0.3-SNAPSHOT   # BROOKLYN_ELK_VERSION
+  version: 2.0.4-SNAPSHOT   # BROOKLYN_ELK_VERSION
   items:
     - "classpath://kibana/kibana.bom"

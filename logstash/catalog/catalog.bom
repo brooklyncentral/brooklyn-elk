@@ -1,3 +1,5 @@
 brooklyn.catalog:
+  bundle: io.brooklyn.elk.brooklyn-logstash
+  version: 2.0.3-SNAPSHOT   # BROOLYN_ELK_VERSION
   items:
     - "classpath://logstash/logstash.bom"
